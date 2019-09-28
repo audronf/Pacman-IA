@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+import heapq
 
 class SearchProblem:
     """
@@ -87,17 +88,85 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
+    Frontier = util.Stack()
+    Visited = []
+    Frontier.push( (problem.getStartState(), []) )
+    Visited.append( problem.getStartState() )
+
+    while Frontier.isEmpty() == 0:
+        state, actions = Frontier.pop()
+
+        for next in problem.getSuccessors(state):
+            n_state = next[0]
+            n_direction = next[1]
+            if n_state not in Visited:
+                if problem.isGoalState(n_state):
+                    #print 'Find Goal'
+                    return actions + [n_direction]
+                else:
+                    Frontier.push( (n_state, actions + [n_direction]) )
+                    Visited.append( n_state )
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    Frontier = util.Queue()
+    Visited = []
+    Frontier.push( (problem.getStartState(), []) )
+    #print 'Start',problem.getStartState()
+    #Visited.append( problem.getStartState() )
+
+    while Frontier.isEmpty() == 0:
+        state, actions = Frontier.pop()
+
+        for next in problem.getSuccessors(state):
+            n_state = next[0]
+            n_direction = next[1]
+            if n_state not in Visited:
+                if problem.isGoalState(n_state):
+                    #print 'Find Goal'
+                    return actions + [n_direction]
+                Frontier.push( (n_state, actions + [n_direction]) )
+                Visited.append( n_state )
+
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    def _update(Frontier, item, priority):
+        for index, (p, c, i) in enumerate(Frontier.heap):
+            if i[0] == item[0]:
+                if p <= priority:
+                    break
+                del Frontier.heap[index]
+                Frontier.heap.append((priority, c, item))
+                heapq.heapify(Frontier.heap)
+                break
+        else:
+            Frontier.push(item, priority)
+
+    Frontier = util.PriorityQueue()
+    Visited = []
+    Frontier.push( (problem.getStartState(), []), 0 )
+    Visited.append( problem.getStartState() )
+
+    while Frontier.isEmpty() == 0:
+        state, actions = Frontier.pop()
+
+        if problem.isGoalState(state):
+            return actions
+
+        if state not in Visited:
+            Visited.append( state )
+
+        for next in problem.getSuccessors(state):
+            n_state = next[0]
+            n_direction = next[1]
+            if n_state not in Visited:
+                _update( Frontier, (n_state, actions + [n_direction]), problem.getCostOfActions(actions+[n_direction]) )
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +178,39 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    def _update(Frontier, item, priority):
+        for index, (p, c, i) in enumerate(Frontier.heap):
+            if i[0] == item[0]:
+                if p <= priority:
+                    break
+                del Frontier.heap[index]
+                Frontier.heap.append((priority, c, item))
+                heapq.heapify(Frontier.heap)
+                break
+        else:
+            Frontier.push(item, priority)
+
+    Frontier = util.PriorityQueue()
+    Visited = []
+    Frontier.push( (problem.getStartState(), []), heuristic(problem.getStartState(), problem) )
+    Visited.append( problem.getStartState() )
+
+    while Frontier.isEmpty() == 0:
+        state, actions = Frontier.pop()
+        #print state
+        if problem.isGoalState(state):
+            #print 'Find Goal'
+            return actions
+
+        if state not in Visited:
+            Visited.append( state )
+
+        for next in problem.getSuccessors(state):
+            n_state = next[0]
+            n_direction = next[1]
+            if n_state not in Visited:
+                _update( Frontier, (n_state, actions + [n_direction]), \
+                    problem.getCostOfActions(actions+[n_direction])+heuristic(n_state, problem) )
 
 
 # Abbreviations

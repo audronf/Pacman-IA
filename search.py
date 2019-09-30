@@ -62,7 +62,6 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
-
 def tinyMazeSearch(problem):
     """
     Returns a sequence of moves that solves tinyMaze.  For any other maze, the
@@ -124,9 +123,8 @@ def breadthFirstSearch(problem):
                     direccionesNuevas = direcciones + [proxDireccion]
                     estadosDirecciones.push((proxEstado, direccionesNuevas))
 
-
-
 def uniformCostSearch(problem):
+    # Se hace uso del módulo HeapQ (https://docs.python.org/2/library/heapq.html) para implementar una cola con prioridad
 
     estadosDirecciones = util.PriorityQueue()
     estadosDirecciones.push((problem.getStartState(), []), 0)
@@ -161,6 +159,7 @@ def uniformCostSearch(problem):
                             
                         del estadosDirecciones.heap[index]
                         estadosDirecciones.heap.append((prioridad, c, (proxEstado, direccionesNuevas)))
+                        # Heapify transforma la lista en una cola con prioridad
                         heapq.heapify(estadosDirecciones.heap)
                         break
                 else:
@@ -174,6 +173,7 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
+    # Se hace uso del módulo HeapQ (https://docs.python.org/2/library/heapq.html) para implementar una cola con prioridad
 
     estadosDirecciones = util.PriorityQueue()
     estadosDirecciones.push((problem.getStartState(), []), heuristic(problem.getStartState(), problem))
@@ -210,6 +210,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
                         del estadosDirecciones.heap[index]
                         estadosDirecciones.heap.append((prioridad, c, (proxEstado, direccionesNuevas)))
+                        # Heapify transforma la lista en una cola con prioridad
                         heapq.heapify(estadosDirecciones.heap)
                         break
                 else:

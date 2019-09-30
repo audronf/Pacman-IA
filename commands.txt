@@ -3,7 +3,7 @@ py pacman.py
 py pacman.py --layout testMaze --pacman GoWestAgent
 py pacman.py --layout tinyMaze --pacman GoWestAgent
 py pacman.py -h
-py pacman.py -l tinyMaze -p Search Agent -a fn=tinyMazeSearch
+py pacman.py -l tinyMaze -p SearchAgent -a fn=tinyMazeSearch
 py pacman.py -l tinyMaze -p SearchAgent
 py pacman.py -l mediumMaze -p SearchAgent
 py pacman.py -l bigMaze -z .5 -p SearchAgent

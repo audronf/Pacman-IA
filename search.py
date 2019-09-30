@@ -81,7 +81,7 @@ def depthFirstSearch(problem):
     visitados.append(problem.getStartState())
 
     while not estadosDirecciones.isEmpty():
-        #Desapilo
+
         estado, direcciones = estadosDirecciones.pop()
 
         for prox in problem.getSuccessors(estado):
@@ -98,7 +98,6 @@ def depthFirstSearch(problem):
                     direccionesNuevas = direcciones + [proxDireccion]
                     estadosDirecciones.push((proxEstado, direccionesNuevas))
 
-    util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     estadosDirecciones = util.Queue()
@@ -125,31 +124,17 @@ def breadthFirstSearch(problem):
                     direccionesNuevas = direcciones + [proxDireccion]
                     estadosDirecciones.push((proxEstado, direccionesNuevas))
 
-    return []
 
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    def _update(estadosDirecciones, item, priority):
-        for index, (p, c, i) in enumerate(estadosDirecciones.heap):
-            if i[0] == item[0]:
-                if p <= priority:
-                    break
-                del estadosDirecciones.heap[index]
-                estadosDirecciones.heap.append((priority, c, item))
-                # Lo convierto en una pila
-                heapq.heapify(estadosDirecciones.heap)
-                break
-        else:
-            estadosDirecciones.push(item, priority)
 
     estadosDirecciones = util.PriorityQueue()
-    visitados = []
-    estadosDirecciones.push( (problem.getStartState(), []), 0 )
-    visitados.append( problem.getStartState() )
+    estadosDirecciones.push((problem.getStartState(), []), 0)
 
-    while estadosDirecciones.isEmpty() == 0:
+    visitados = []
+    visitados.append(problem.getStartState())
+
+    while not estadosDirecciones.isEmpty():
         estado, direcciones = estadosDirecciones.pop()
 
         if problem.isGoalState(estado):
@@ -159,10 +144,27 @@ def uniformCostSearch(problem):
             visitados.append(estado)
 
         for prox in problem.getSuccessors(estado):
+
             proxEstado = prox[0]
             proxDireccion = prox[1]
+
             if proxEstado not in visitados:
-                _update( estadosDirecciones, (proxEstado, direcciones + [proxDireccion]), problem.getCostOfActions(direcciones+[proxDireccion]) )
+                direccionesNuevas = direcciones + [proxDireccion]
+                prioridad = problem.getCostOfActions(direccionesNuevas)
+
+                for index, (p, c, i) in enumerate(estadosDirecciones.heap):
+
+                    if i[0] == proxEstado:
+
+                        if p <= prioridad:
+                            break
+                            
+                        del estadosDirecciones.heap[index]
+                        estadosDirecciones.heap.append((prioridad, c, (proxEstado, direccionesNuevas)))
+                        heapq.heapify(estadosDirecciones.heap)
+                        break
+                else:
+                    estadosDirecciones.push((proxEstado, direccionesNuevas), prioridad)
 
 def nullHeuristic(state, problem=None):
     """
@@ -172,28 +174,17 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    def _update(estadosDirecciones, item, priority):
-        for index, (p, c, i) in enumerate(estadosDirecciones.heap):
-            if i[0] == item[0]:
-                if p <= priority:
-                    break
-                del estadosDirecciones.heap[index]
-                estadosDirecciones.heap.append((priority, c, item))
-                # Lo convierto en una pila
-                heapq.heapify(estadosDirecciones.heap)
-                break
-        else:
-            estadosDirecciones.push(item, priority)
 
     estadosDirecciones = util.PriorityQueue()
+    estadosDirecciones.push((problem.getStartState(), []), heuristic(problem.getStartState(), problem))
+    
     visitados = []
-    estadosDirecciones.push( (problem.getStartState(), []), heuristic(problem.getStartState(), problem) )
     visitados.append( problem.getStartState() )
 
-    while estadosDirecciones.isEmpty() == 0:
+    while not estadosDirecciones.isEmpty():
+
         estado, direcciones = estadosDirecciones.pop()
+
         if problem.isGoalState(estado):
             return direcciones
 
@@ -201,11 +192,29 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             visitados.append(estado)
 
         for prox in problem.getSuccessors(estado):
+
             proxEstado = prox[0]
             proxDireccion = prox[1]
+
             if proxEstado not in visitados:
-                _update( estadosDirecciones, (proxEstado, direcciones + [proxDireccion]), \
-                    problem.getCostOfActions(direcciones+[proxDireccion])+heuristic(proxEstado, problem) )
+
+                direccionesNuevas = direcciones + [proxDireccion]
+                prioridad = problem.getCostOfActions(direccionesNuevas) + heuristic(proxEstado, problem)
+
+                for index, (p, c, i) in enumerate(estadosDirecciones.heap):
+
+                    if i[0] == proxEstado:
+
+                        if p <= prioridad:
+                            break
+
+                        del estadosDirecciones.heap[index]
+                        estadosDirecciones.heap.append((prioridad, c, (proxEstado, direccionesNuevas)))
+                        heapq.heapify(estadosDirecciones.heap)
+                        break
+                else:
+                    estadosDirecciones.push((proxEstado, direccionesNuevas), prioridad)
+            
 
 
 # Abbreviations

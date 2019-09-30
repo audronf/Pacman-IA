@@ -74,95 +74,97 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first.
+    estadosDirecciones = util.Stack()
+    estadosDirecciones.push((problem.getStartState(), []))
 
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
+    visitados = []
+    visitados.append(problem.getStartState())
 
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
+    while not estadosDirecciones.isEmpty():
 
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    """
-    "*** YOUR CODE HERE ***"
-    Frontier = util.Stack()
-    Visited = []
-    Frontier.push( (problem.getStartState(), []) )
-    Visited.append( problem.getStartState() )
+        estado, direcciones = estadosDirecciones.pop()
 
-    while Frontier.isEmpty() == 0:
-        state, actions = Frontier.pop()
+        for prox in problem.getSuccessors(estado):
 
-        for next in problem.getSuccessors(state):
-            n_state = next[0]
-            n_direction = next[1]
-            if n_state not in Visited:
-                if problem.isGoalState(n_state):
-                    #print 'Find Goal'
-                    return actions + [n_direction]
+            proxEstado = prox[0]
+            proxDireccion = prox[1]
+
+            if proxEstado not in visitados:
+                if problem.isGoalState(proxEstado):
+                    resultado = direcciones + [proxDireccion]
+                    return resultado
                 else:
-                    Frontier.push( (n_state, actions + [n_direction]) )
-                    Visited.append( n_state )
+                    visitados = visitados + [estado]
+                    direccionesNuevas = direcciones + [proxDireccion]
+                    estadosDirecciones.push((proxEstado, direccionesNuevas))
 
-    util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    frontier = util.Queue()
-    frontier.push((problem.getStartState(), []))
+    estadosDirecciones = util.Queue()
+    estadosDirecciones.push((problem.getStartState(), []))
 
-    explored = []
-    while not frontier.isEmpty():
-        node, actions = frontier.pop()
+    visitados = []
+    visitados.append(problem.getStartState())
 
-        for coord, direction, steps in problem.getSuccessors(node):
-            if not coord in explored:
-                if problem.isGoalState(coord):
-                    return actions + [direction]
-                frontier.push((coord, actions + [direction]))
-                explored = explored + [node]
+    while not estadosDirecciones.isEmpty():
+        #Desacolo
+        estado, direcciones = estadosDirecciones.pop()
 
-    return []
+        for prox in problem.getSuccessors(estado):
+            
+            proxEstado = prox[0]
+            proxDireccion = prox[1]
+
+            if proxEstado not in visitados:
+                if problem.isGoalState(proxEstado):
+                    resultado = direcciones + [proxDireccion]
+                    return resultado
+                else:
+                    visitados = visitados + [estado]
+                    direccionesNuevas = direcciones + [proxDireccion]
+                    estadosDirecciones.push((proxEstado, direccionesNuevas))
+
 
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    def _update(Frontier, item, priority):
-        for index, (p, c, i) in enumerate(Frontier.heap):
-            if i[0] == item[0]:
-                if p <= priority:
-                    break
-                del Frontier.heap[index]
-                Frontier.heap.append((priority, c, item))
-                heapq.heapify(Frontier.heap)
-                break
-        else:
-            Frontier.push(item, priority)
 
-    Frontier = util.PriorityQueue()
-    Visited = []
-    Frontier.push( (problem.getStartState(), []), 0 )
-    Visited.append( problem.getStartState() )
+    estadosDirecciones = util.PriorityQueue()
+    estadosDirecciones.push((problem.getStartState(), []), 0)
 
-    while Frontier.isEmpty() == 0:
-        state, actions = Frontier.pop()
+    visitados = []
+    visitados.append(problem.getStartState())
 
-        if problem.isGoalState(state):
-            return actions
+    while not estadosDirecciones.isEmpty():
+        estado, direcciones = estadosDirecciones.pop()
 
-        if state not in Visited:
-            Visited.append( state )
+        if problem.isGoalState(estado):
+            return direcciones
 
-        for next in problem.getSuccessors(state):
-            n_state = next[0]
-            n_direction = next[1]
-            if n_state not in Visited:
-                _update( Frontier, (n_state, actions + [n_direction]), problem.getCostOfActions(actions+[n_direction]) )
+        if estado not in visitados:
+            visitados.append(estado)
+
+        for prox in problem.getSuccessors(estado):
+
+            proxEstado = prox[0]
+            proxDireccion = prox[1]
+
+            if proxEstado not in visitados:
+                direccionesNuevas = direcciones + [proxDireccion]
+                prioridad = problem.getCostOfActions(direccionesNuevas)
+
+                for index, (p, c, i) in enumerate(estadosDirecciones.heap):
+
+                    if i[0] == proxEstado:
+
+                        if p <= prioridad:
+                            break
+                            
+                        del estadosDirecciones.heap[index]
+                        estadosDirecciones.heap.append((prioridad, c, (proxEstado, direccionesNuevas)))
+                        heapq.heapify(estadosDirecciones.heap)
+                        break
+                else:
+                    estadosDirecciones.push((proxEstado, direccionesNuevas), prioridad)
 
 def nullHeuristic(state, problem=None):
     """
@@ -172,41 +174,47 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    def _update(Frontier, item, priority):
-        for index, (p, c, i) in enumerate(Frontier.heap):
-            if i[0] == item[0]:
-                if p <= priority:
-                    break
-                del Frontier.heap[index]
-                Frontier.heap.append((priority, c, item))
-                heapq.heapify(Frontier.heap)
-                break
-        else:
-            Frontier.push(item, priority)
 
-    Frontier = util.PriorityQueue()
-    Visited = []
-    Frontier.push( (problem.getStartState(), []), heuristic(problem.getStartState(), problem) )
-    Visited.append( problem.getStartState() )
+    estadosDirecciones = util.PriorityQueue()
+    estadosDirecciones.push((problem.getStartState(), []), heuristic(problem.getStartState(), problem))
+    
+    visitados = []
+    visitados.append( problem.getStartState() )
 
-    while Frontier.isEmpty() == 0:
-        state, actions = Frontier.pop()
-        #print state
-        if problem.isGoalState(state):
-            #print 'Find Goal'
-            return actions
+    while not estadosDirecciones.isEmpty():
 
-        if state not in Visited:
-            Visited.append( state )
+        estado, direcciones = estadosDirecciones.pop()
 
-        for next in problem.getSuccessors(state):
-            n_state = next[0]
-            n_direction = next[1]
-            if n_state not in Visited:
-                _update( Frontier, (n_state, actions + [n_direction]), \
-                    problem.getCostOfActions(actions+[n_direction])+heuristic(n_state, problem) )
+        if problem.isGoalState(estado):
+            return direcciones
+
+        if estado not in visitados:
+            visitados.append(estado)
+
+        for prox in problem.getSuccessors(estado):
+
+            proxEstado = prox[0]
+            proxDireccion = prox[1]
+
+            if proxEstado not in visitados:
+
+                direccionesNuevas = direcciones + [proxDireccion]
+                prioridad = problem.getCostOfActions(direccionesNuevas) + heuristic(proxEstado, problem)
+
+                for index, (p, c, i) in enumerate(estadosDirecciones.heap):
+
+                    if i[0] == proxEstado:
+
+                        if p <= prioridad:
+                            break
+
+                        del estadosDirecciones.heap[index]
+                        estadosDirecciones.heap.append((prioridad, c, (proxEstado, direccionesNuevas)))
+                        heapq.heapify(estadosDirecciones.heap)
+                        break
+                else:
+                    estadosDirecciones.push((proxEstado, direccionesNuevas), prioridad)
+            
 
 
 # Abbreviations
